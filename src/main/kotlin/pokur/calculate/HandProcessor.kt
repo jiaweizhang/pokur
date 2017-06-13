@@ -11,23 +11,25 @@ class HandProcessor() {
         return communityCards.plus(holeCards.holeCards.first).plus(holeCards.holeCards.second)
     }
 
-    fun rank(communityCards: List<Card>, holeCards: List<PlayerHand>): List<List<PlayerHand>> {
-        val handRanking = mutableListOf<List<PlayerHand>>()
+    fun rank(communityCards: List<Card>, holeCards: List<PlayerHand>): List<List<RankingUnit>> {
+        val handRanking = mutableListOf<List<RankingUnit>>()
 
+        val temporaryRanking = mutableListOf<RankingUnit>()
         holeCards.forEach {
-            it.rank = findInt(getSevenCards(communityCards, it))
+            val rank = findInt(getSevenCards(communityCards, it))
+            temporaryRanking.add(RankingUnit(it, rank))
         }
 
-        val rankingGroups = holeCards.groupBy { it.rank }
+        val rankingGroups = temporaryRanking.groupBy { it.rank }
 
-        rankingGroups.keys.toSortedSet().mapTo(handRanking) { rankingGroups.getValue(it) }
+        rankingGroups.keys.toSortedSet().reversed().mapTo(handRanking) { rankingGroups.getValue(it) }
         return handRanking
     }
 
     fun findInt(sevenCards: List<Card>): Int {
         var type = 0
 
-        val sortedCards = sevenCards.sortedBy {
+        val sortedCards = sevenCards.sortedByDescending {
             it.face
         }
 
@@ -56,7 +58,7 @@ class HandProcessor() {
         var pairKicker2 = -1
         var pairKicker3 = -1
 
-        var straightHigh = 13
+        var straightHigh = 0
         var spadesCount = 0
         var heartsCount = 0
         var clubsCount = 0
@@ -67,9 +69,9 @@ class HandProcessor() {
                 // 4 3 - Q
                 // if count quad, cannot possibly be SF
                 if (first == fourth) {
-                    return 8 shl 20 + first shl 16 + fifth shl 12
+                    return (8 shl 20) + (first shl 16) + (fifth shl 12)
                 } else {
-                    return 8 shl 20 + fourth shl 16 + first shl 12
+                    return (8 shl 20) + (fourth shl 16) + (first shl 12)
                 }
             }
             3 -> {
@@ -78,15 +80,15 @@ class HandProcessor() {
                     if (first == second) {
                         if (second == third) {
                             // quad is top
-                            return 8 shl 20 + first shl 16 + fifth shl 12
+                            return (8 shl 20) + (first shl 16) + (fifth shl 12)
                         } else {
                             // pair is top
                             if (third == fourth) {
                                 // quad is after top
-                                return 8 shl 20 + third shl 16 + first shl 12
+                                return (8 shl 20) + (third shl 16) + (first shl 12)
                             } else {
                                 // quad is last
-                                return 8 shl 20 + fourth shl 16 + first shl 12
+                                return (8 shl 20) + (fourth shl 16) + (first shl 12)
                             }
                         }
                     }
@@ -98,14 +100,14 @@ class HandProcessor() {
                         // 3 3 1 or 3 1 3
                         if (fourth == fifth) {
                             // 3 3 1
-                            return 7 shl 20 + first shl 16 + fourth shl 12
+                            return (7 shl 20) + (first shl 16) + (fourth shl 12)
                         } else {
                             // 3 1 3
-                            return 7 shl 20 + first shl 16 + fifth shl 12
+                            return (7 shl 20) + (first shl 16) + (fifth shl 12)
                         }
                     } else {
                         // 1 3 3
-                        return 7 shl 20 + second shl 16 + fifth shl 12
+                        return (7 shl 20) + (second shl 16) + (fifth shl 12)
                     }
                 }
 
@@ -113,13 +115,13 @@ class HandProcessor() {
                 else {
                     if (second == third) {
                         // 3 2 2
-                        return 7 shl 20 + first shl 16 + fourth shl 12
+                        return (7 shl 20) + (first shl 16) + (fourth shl 12)
                     } else if (fourth == fifth) {
                         // 2 3 2
-                        return 7 shl 20 + third shl 16 + first shl 12
+                        return (7 shl 20) + (third shl 16) + (first shl 12)
                     } else {
                         // 2 2 3
-                        return 7 shl 20 + fifth shl 16 + first shl 12
+                        return (7 shl 20) + (fifth shl 16) + (first shl 12)
                     }
                 }
             }
@@ -128,16 +130,16 @@ class HandProcessor() {
                 if (groupedCards.any { it.value.size == 4 }) {
                     if (first == second) {
                         // 4 1 1 1
-                        return 8 shl 20 + first shl 16 + fifth shl 12
+                        return (8 shl 20) + (first shl 16) + (fifth shl 12)
                     } else if (second == third) {
                         // 1 4 1 1
-                        return 8 shl 20 + second shl 16 + first shl 12
+                        return (8 shl 20) + (second shl 16) + (first shl 12)
                     } else if (third == fourth) {
                         // 1 1 4 1
-                        return 8 shl 20 + third shl 16 + first shl 12
+                        return (8 shl 20) + (third shl 16) + (first shl 12)
                     } else {
                         // 1 1 1 4
-                        return 8 shl 20 + fourth shl 16 + first shl 12
+                        return (8 shl 20) + (fourth shl 16) + (first shl 12)
                     }
                 }
 
@@ -158,7 +160,7 @@ class HandProcessor() {
                             fhPair = it.key
                         }
                     }
-                    return 7 shl 20 + fhTriple shl 16 + fhPair shl 12
+                    return (7 shl 20) + (fhTriple shl 16) + (fhPair shl 12)
                 }
 
                 // 2 2 2 1
@@ -352,16 +354,16 @@ class HandProcessor() {
                 type = 5
                 straightHigh = distinctCards.get(0).face
                 if (findStraightFlush(flushSuit, straightHigh, groupedCards)) {
-                    return 9 shl 20 + straightHigh shl 16
+                    return (9 shl 20) + (straightHigh shl 16)
                 }
             } else if ((distinctCards.get(1).face == 3)
                     and (distinctCards.get(4).face == 0)
-                    and (distinctCards.get(0).face == 13)) {
+                    and (distinctCards.get(0).face == 12)) {
                 // 5-high straight
                 type = 5
                 straightHigh = 3
                 if (findFiveHighStraightFlush(flushSuit, groupedCards)) {
-                    return 9 shl 20 + 3 shl 16
+                    return (9 shl 20) + (3 shl 16)
                 }
             }
         } else if (distinctCards.size == 6) {
@@ -370,22 +372,22 @@ class HandProcessor() {
                 type = 5
                 straightHigh = distinctCards.get(0).face
                 if (findStraightFlush(flushSuit, straightHigh, groupedCards)) {
-                    return 9 shl 20 + straightHigh shl 16
+                    return (9 shl 20) + (straightHigh shl 16)
                 }
             } else if (distinctCards.get(1).face == distinctCards.get(5).face + 4) {
                 type = 5
                 straightHigh = distinctCards.get(1).face
                 if (findStraightFlush(flushSuit, straightHigh, groupedCards)) {
-                    return 9 shl 20 + straightHigh shl 16
+                    return (9 shl 20) + (straightHigh shl 16)
                 }
             } else if ((distinctCards.get(2).face == 3)
                     and (distinctCards.get(5).face == 0)
-                    and (distinctCards.get(0).face == 13)) {
+                    and (distinctCards.get(0).face == 12)) {
                 // 5-high straight
                 type = 5
                 straightHigh = 3
                 if (findFiveHighStraightFlush(flushSuit, groupedCards)) {
-                    return 9 shl 20 + 3 shl 16
+                    return (9 shl 20) + (3 shl 16)
                 }
             }
         } else {
@@ -394,28 +396,28 @@ class HandProcessor() {
                 type = 5
                 straightHigh = distinctCards.get(0).face
                 if (findStraightFlush(flushSuit, straightHigh, groupedCards)) {
-                    return 9 shl 20 + straightHigh shl 16
+                    return (9 shl 20) + (straightHigh shl 16)
                 }
             } else if (distinctCards.get(1).face == distinctCards.get(5).face + 4) {
                 type = 5
                 straightHigh = distinctCards.get(1).face
                 if (findStraightFlush(flushSuit, straightHigh, groupedCards)) {
-                    return 9 shl 20 + straightHigh shl 16
+                    return (9 shl 20) + (straightHigh shl 16)
                 }
             } else if (distinctCards.get(2).face == distinctCards.get(6).face + 4) {
                 type = 5
                 straightHigh = distinctCards.get(2).face
                 if (findStraightFlush(flushSuit, straightHigh, groupedCards)) {
-                    return 9 shl 20 + straightHigh shl 16
+                    return (9 shl 20) + (straightHigh shl 16)
                 }
             } else if ((distinctCards.get(3).face == 3)
                     and (distinctCards.get(5).face == 0)
-                    and (distinctCards.get(0).face == 13)) {
+                    and (distinctCards.get(0).face == 12)) {
                 // 5-high straight
                 type = 5
                 straightHigh = 3
                 if (findFiveHighStraightFlush(flushSuit, groupedCards)) {
-                    return 9 shl 20 + 3 shl 16
+                    return (9 shl 20) + (3 shl 16)
                 }
             }
 
@@ -428,31 +430,31 @@ class HandProcessor() {
             val sortedFlush = sortedCards.filter {
                 it.suit == flushSuit
             }
-            return 6 shl 20 + sortedFlush.get(0).face shl 16 + sortedFlush.get(1).face shl 12 + sortedFlush.get(2).face shl 8 + sortedFlush.get(3).face shl 4 + sortedFlush.get(4).face
+            return (6 shl 20) + (sortedFlush.get(0).face shl 16) + (sortedFlush.get(1).face shl 12) + (sortedFlush.get(2).face shl 8) + (sortedFlush.get(3).face shl 4) + (sortedFlush.get(4).face)
         }
 
         // return straight
         if (type == 5) {
-            return 5 shl 20 + straightHigh shl 16
+            return (5 shl 20) + (straightHigh shl 16)
         }
 
         // return triple
         if (type == 4) {
-            return 4 shl 20 + triple shl 16 + tripleKicker shl 12 + tripleKicker2 shl 8
+            return (4 shl 20) + (triple shl 16) + (tripleKicker shl 12) + (tripleKicker2 shl 8)
         }
 
         // two pair
         if (type == 3) {
-            return 3 shl 20 + twoPairTopPair shl 16 + twoPairBottomPair shl 12 + twoPairKicker shl 8
+            return (3 shl 20) + (twoPairTopPair shl 16) + (twoPairBottomPair shl 12) + (twoPairKicker shl 8)
         }
 
         // pair
         if (type == 2) {
-            return 2 shl 20 + pair shl 16 + pairKicker shl 12 + pairKicker2 shl 8 + pairKicker3 shl 4
+            return (2 shl 20) + (pair shl 16) + (pairKicker shl 12) + (pairKicker2 shl 8) + (pairKicker3 shl 4)
         }
 
         if (type == 1) {
-            return 1 shl 20 + first shl 16 + second shl 12 + third shl 8 + fourth shl 4 + fifth
+            return (1 shl 20) + (first shl 16) + (second shl 12) + (third shl 8) + (fourth shl 4) + fifth
         }
 
         throw Exception("Impossible type")
