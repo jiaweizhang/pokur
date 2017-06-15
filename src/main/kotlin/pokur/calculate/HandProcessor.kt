@@ -6,7 +6,7 @@ import pokur.Card
  * Created by jiaweizhang on 6/12/2017.
  */
 
-class HandProcessor() {
+class HandProcessor {
     fun getSevenCards(communityCards: List<Card>, holeCards: PlayerHand): List<Card> {
         return communityCards.plus(holeCards.holeCards.first).plus(holeCards.holeCards.second)
     }
@@ -27,7 +27,7 @@ class HandProcessor() {
     }
 
     fun findInt(sevenCards: List<Card>): Int {
-        var type = 0
+        var type: Int
 
         val sortedCards = sevenCards.sortedByDescending {
             it.face
@@ -58,7 +58,7 @@ class HandProcessor() {
         var pairKicker2 = -1
         var pairKicker3 = -1
 
-        var straightHigh = 0
+        var straightHigh = -1
         var spadesCount = 0
         var heartsCount = 0
         var clubsCount = 0
@@ -90,6 +90,14 @@ class HandProcessor() {
                                 // quad is last
                                 return (8 shl 20) + (fourth shl 16) + (first shl 12)
                             }
+                        }
+                    } else {
+                        if (second == fourth) {
+                            // 1 4 2
+                            return (8 shl 20) + (second shl 16) + (first shl 12)
+                        } else {
+                            // 1 2 4
+                            return (8 shl 20) + (fourth shl 16) + (first shl 12)
                         }
                     }
                 }
@@ -175,7 +183,7 @@ class HandProcessor() {
                         // 2 2 2 1
                         twoPairTopPair = first
                         twoPairBottomPair = third
-                        twoPairKicker = seventh
+                        twoPairKicker = fifth
                     } else if (fourth != fifth) {
                         // 2 2 1 2
                         twoPairTopPair = first
@@ -279,9 +287,9 @@ class HandProcessor() {
                 if (first == second) {
                     // 2 1 1 1 1 1
                     pair = first
-                    pairKicker = second
-                    pairKicker2 = third
-                    pairKicker3 = fourth
+                    pairKicker = third
+                    pairKicker2 = fourth
+                    pairKicker3 = fifth
                 } else if (second == third) {
                     // 1 2 1 1 1 1
                     pair = second
@@ -319,7 +327,6 @@ class HandProcessor() {
             }
         }
 
-        var buckets = 0
         sevenCards.forEach {
             // fill suits - technically don't need to iterate all 7
             val suit = it.suit
@@ -356,12 +363,15 @@ class HandProcessor() {
                 if (findStraightFlush(flushSuit, straightHigh, groupedCards)) {
                     return (9 shl 20) + (straightHigh shl 16)
                 }
-            } else if ((distinctCards.get(1).face == 3)
+            }
+            if ((distinctCards.get(1).face == 3)
                     and (distinctCards.get(4).face == 0)
                     and (distinctCards.get(0).face == 12)) {
                 // 5-high straight
                 type = 5
-                straightHigh = 3
+                if (straightHigh < 3) {
+                    straightHigh = 3
+                }
                 if (findFiveHighStraightFlush(flushSuit, groupedCards)) {
                     return (9 shl 20) + (3 shl 16)
                 }
@@ -374,23 +384,29 @@ class HandProcessor() {
                 if (findStraightFlush(flushSuit, straightHigh, groupedCards)) {
                     return (9 shl 20) + (straightHigh shl 16)
                 }
-            } else if (distinctCards.get(1).face == distinctCards.get(5).face + 4) {
+            }
+            if (distinctCards.get(1).face == distinctCards.get(5).face + 4) {
                 type = 5
-                straightHigh = distinctCards.get(1).face
-                if (findStraightFlush(flushSuit, straightHigh, groupedCards)) {
-                    return (9 shl 20) + (straightHigh shl 16)
+                if (straightHigh < distinctCards.get(1).face) {
+                    straightHigh = distinctCards.get(1).face
                 }
-            } else if ((distinctCards.get(2).face == 3)
+                if (findStraightFlush(flushSuit, distinctCards.get(1).face, groupedCards)) {
+                    return (9 shl 20) + (distinctCards.get(1).face shl 16)
+                }
+            }
+            if ((distinctCards.get(2).face == 3)
                     and (distinctCards.get(5).face == 0)
                     and (distinctCards.get(0).face == 12)) {
                 // 5-high straight
                 type = 5
-                straightHigh = 3
+                if (straightHigh < 3) {
+                    straightHigh = 3
+                }
                 if (findFiveHighStraightFlush(flushSuit, groupedCards)) {
                     return (9 shl 20) + (3 shl 16)
                 }
             }
-        } else {
+        } else if (distinctCards.size == 7) {
             // size 7 - all different digits
             if (distinctCards.get(0).face == distinctCards.get(4).face + 4) {
                 type = 5
@@ -398,24 +414,33 @@ class HandProcessor() {
                 if (findStraightFlush(flushSuit, straightHigh, groupedCards)) {
                     return (9 shl 20) + (straightHigh shl 16)
                 }
-            } else if (distinctCards.get(1).face == distinctCards.get(5).face + 4) {
+            }
+            if (distinctCards.get(1).face == distinctCards.get(5).face + 4) {
                 type = 5
-                straightHigh = distinctCards.get(1).face
-                if (findStraightFlush(flushSuit, straightHigh, groupedCards)) {
-                    return (9 shl 20) + (straightHigh shl 16)
+                if (straightHigh < distinctCards.get(1).face) {
+                    straightHigh = distinctCards.get(1).face
                 }
-            } else if (distinctCards.get(2).face == distinctCards.get(6).face + 4) {
+                if (findStraightFlush(flushSuit, distinctCards.get(1).face, groupedCards)) {
+                    return (9 shl 20) + (distinctCards.get(1).face shl 16)
+                }
+            }
+            if (distinctCards.get(2).face == distinctCards.get(6).face + 4) {
                 type = 5
-                straightHigh = distinctCards.get(2).face
-                if (findStraightFlush(flushSuit, straightHigh, groupedCards)) {
-                    return (9 shl 20) + (straightHigh shl 16)
+                if (straightHigh < distinctCards.get(2).face) {
+                    straightHigh = distinctCards.get(2).face
                 }
-            } else if ((distinctCards.get(3).face == 3)
+                if (findStraightFlush(flushSuit, distinctCards.get(2).face, groupedCards)) {
+                    return (9 shl 20) + (distinctCards.get(2).face shl 16)
+                }
+            }
+            if ((distinctCards.get(3).face == 3)
                     and (distinctCards.get(5).face == 0)
                     and (distinctCards.get(0).face == 12)) {
                 // 5-high straight
                 type = 5
-                straightHigh = 3
+                if (straightHigh < 3) {
+                    straightHigh = 3
+                }
                 if (findFiveHighStraightFlush(flushSuit, groupedCards)) {
                     return (9 shl 20) + (3 shl 16)
                 }
@@ -465,7 +490,7 @@ class HandProcessor() {
             // check series of 5 for flush
 
             var isStraightFlush = true
-            for (i in straightHigh..straightHigh - 4) {
+            for (i in straightHigh.downTo(straightHigh - 4)) {
                 var suitFoundInCurrent = false
                 for (j in groupedCards.getValue(i)) {
                     if (j.suit == flushSuit) {
