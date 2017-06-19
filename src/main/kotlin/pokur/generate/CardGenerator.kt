@@ -20,13 +20,13 @@ class CardGenerator {
         val allCards = IntStream.range(0, 52).boxed().collect(Collectors.toList())
         Collections.shuffle(allCards)
         return allCards.subList(0, count).map {
-            val suit = when (it % 13) {
+            val suit = when (it / 13) {
                 0 -> 'S'
                 1 -> 'H'
                 2 -> 'C'
                 else -> 'D'
             }
-            Card(it % 4, suit)
+            Card(it % 13, suit)
         }
     }
 
@@ -42,8 +42,8 @@ class CardGenerator {
                 continue
             } else {
                 alreadySeen.add(randomInt)
-                randomCards.add(Card(randomInt % 4,
-                        when (randomInt % 13) {
+                randomCards.add(Card(randomInt % 13,
+                        when (randomInt / 13) {
                             0 -> 'S'
                             1 -> 'H'
                             2 -> 'C'

@@ -16,7 +16,7 @@ class HandProcessor {
 
         val temporaryRanking = mutableListOf<RankingUnit>()
         holeCards.forEach {
-            val rank = findInt(getSevenCards(communityCards, it))
+            val rank = findInt7(getSevenCards(communityCards, it))
             temporaryRanking.add(RankingUnit(it, rank))
         }
 
@@ -26,7 +26,250 @@ class HandProcessor {
         return handRanking
     }
 
-    fun findInt(sevenCards: List<Card>): Int {
+    fun findInt5(fiveCards: List<Card>): Int {
+        // find handValue using grouping
+        var pair1 = -1
+        var pair2 = -1
+
+        var set = -1
+
+        var high1 = -1
+        var high2 = -1
+        var high3 = -1
+        var high4 = -1
+
+        val one = fiveCards[0]
+        val two = fiveCards[1]
+        val three = fiveCards[2]
+        val four = fiveCards[3]
+        val five = fiveCards[4]
+
+        // process first card
+        high1 = one.face
+
+        // process second card
+        if (two.face == high1) {
+            // 2
+            pair1 = high1
+            high1 = -1
+        } else {
+            // 1 1
+            high2 = two.face
+        }
+
+        // process third card
+        if (three.face == pair1) {
+            // 3
+            set = pair1
+            pair1 = -1
+        } else if (pair1 != -1) {
+            // 2 1
+            high1 = three.face
+        } else {
+            if (three.face == high1) {
+                // 2 1
+                pair1 = high1
+                high1 = high2
+                high2 = -1
+            } else if (three.face == high2) {
+                // 2 1
+                pair1 = high2
+                high2 = -1
+            } else {
+                // 1 1 1
+                high3 = three.face
+            }
+        }
+
+        // process fourth card
+        if (four.face == set) {
+            // 4 - can return quad
+            return (8 shl 20) + (set shl 16) + (five.face shl 12)
+        } else if (set != -1) {
+            // 3 1
+            high1 = four.face
+        } else {
+            if (four.face == pair1) {
+                // 3 1
+                set = pair1
+                pair1 = -1
+            } else if ((pair1 != -1) and (four.face == high1)) {
+                // 2 2
+                pair2 = high1
+                high1 = -1
+            } else if ((pair1 != -1)) {
+                high2 = four.face
+            } else if (four.face == high1) {
+                // 2 1 1
+                pair1 = high1
+                high1 = high2
+                high2 = high3
+                high3 = -1
+            } else if (four.face == high2) {
+                // 2 1 1
+                pair1 = high2
+                high2 = high3
+                high3 = -1
+            } else if (four.face == high3) {
+                // 2 1 1
+                pair1 = high3
+                high3 = -1
+            } else {
+                // 1 1 1 1
+                high4 = four.face
+            }
+        }
+
+        // process fifth card
+        if (five.face == set) {
+            // 4 - return quad
+            return (8 shl 20) + (set shl 16) + (high1 shl 12)
+        } else {
+            if ((set != -1) and (five.face == high1)) {
+                // 3 2 - return FH
+                return (7 shl 20) + (set shl 16) + (high1 shl 12)
+            } else if (set != -1) {
+                // 3 1 1 - return set
+                return (4 shl 20) + (set shl 16) + ((if (high1 > five.face) high1 else five.face) shl 12) + ((if (high1 > five.face) five.face else high1) shl 8)
+            } else if (five.face == pair2) {
+                // 3 2 - return FH
+                return (7 shl 20) + (pair2 shl 16) + (pair1 shl 12)
+            } else if ((five.face == pair1) and (pair2 != -1)) {
+                // 3 2 - return FH
+                return (7 shl 20) + (pair1 shl 16) + (pair2 shl 12)
+            } else if ((pair1 != -1) and (pair2 != -1)) {
+                // 2 2 1
+                return (3 shl 20) + ((if (pair1 > pair2) pair1 else pair2) shl 16) + ((if (pair1 > pair2) pair2 else pair1) shl 12) + (five.face shl 8)
+            } else if (five.face == pair1) {
+                // 3 1 1
+                return (4 shl 20) + (pair1 shl 16) + ((if (high1 > high2) high1 else high2) shl 12) + ((if (high1 > high2) high2 else high1) shl 8)
+            } else if ((pair1 != -1) and (five.face == high1)) {
+                // 2 2 1
+                return (3 shl 20) + ((if (pair1 > high1) pair1 else high1) shl 16) + ((if (pair1 > high1) high1 else pair1) shl 12) + (high2 shl 8)
+            } else if ((pair1 != -1) and (five.face == high2)) {
+                // 2 2 1
+                return (3 shl 20) + ((if (pair1 > high2) pair1 else high2) shl 16) + ((if (pair1 > high2) high2 else pair1) shl 12) + (high1 shl 8)
+            } else if ((pair1 != -1)) {
+                // 2 1 1 1
+                return (2 shl 20) + (order3(high1, high2, five.face) shl 4)
+            } else if (five.face == high1) {
+                // 2 1 1 1
+                return (2 shl 20) + (high1 shl 16) + (order3(high2, high3, high4) shl 4)
+            } else if (five.face == high2) {
+                // 2 1 1 1
+                return (2 shl 20) + (high2 shl 16) + (order3(high1, high3, high4) shl 4)
+            } else if (five.face == high3) {
+                // 2 1 1 1
+                return (2 shl 20) + (high3 shl 16) + (order3(high1, high2, high4) shl 4)
+            } else if (five.face == high4) {
+                // 2 1 1 1
+                return (2 shl 20) + (high4 shl 16) + (order3(high1, high2, high3) shl 4)
+            } else {
+                // 1 1 1 1 1
+                val flush = ((one.suit == two.suit) and (one.suit == three.suit) and (one.suit == four.suit) and (one.suit == five.suit))
+                val order5 = order5(one.face, two.face, three.face, four.face, five.face)
+                val straight = order5 and 0b1111
+                if (flush and (straight != 0)) {
+                    return (9 shl 20) + (straight shl 16)
+                }
+                if (flush) {
+                    return (6 shl 20) + (order5 shr 4)
+                }
+                if (straight != 0) {
+                    return (5 shl 20) + (straight shl 16)
+                }
+                return (1 shl 20) + (order5 shr 4)
+            }
+        }
+    }
+
+    fun order3(one: Int, two: Int, three: Int): Int {
+        var tmp: Int
+        var a = one
+        var b = two
+        var c = three
+        if (b < c) {
+            tmp = b
+            b = c
+            c = tmp
+        }
+        if (a < c) {
+            tmp = a
+            a = c
+            c = tmp
+        }
+        if (a < b) {
+            tmp = a
+            a = b
+            b = tmp
+        }
+        return (a shl 8) + (b shl 4) + c
+    }
+
+    fun order5(one: Int, two: Int, three: Int, four: Int, five: Int): Int {
+        var tmp: Int
+        var a = one
+        var b = two
+        var c = three
+        var d = four
+        var e = five
+        if (a < b) {
+            tmp = a
+            a = b
+            b = tmp
+        }
+        if (d < e) {
+            tmp = d
+            d = e
+            e = tmp
+        }
+        if (c < e) {
+            tmp = c
+            c = e
+            e = tmp
+        }
+        if (c < d) {
+            tmp = c
+            c = d
+            d = tmp
+        }
+        if (b < e) {
+            tmp = b
+            b = e
+            e = tmp
+        }
+        if (a < d) {
+            tmp = a
+            a = d
+            d = tmp
+        }
+        if (a < c) {
+            tmp = a
+            a = c
+            c = tmp
+        }
+        if (b < d) {
+            tmp = b
+            b = d
+            d = tmp
+        }
+        if (b < c) {
+            tmp = b
+            b = c
+            c = tmp
+        }
+        val straight = if ((a == b + 1) and (a == c + 2) and (a == d + 3) and (a == e + 4)) {
+            a
+        } else if ((a == 12) and (b == 3) and (c == 2) and (d == 1) and (e == 0)) {
+            3
+        } else {
+            0
+        }
+        return (a shl 20) + (b shl 16) + (c shl 12) + (d shl 8) + (e shl 4) + straight
+
+    }
+
+    fun findInt7(sevenCards: List<Card>): Int {
         var type: Int
 
         val sortedCards = sevenCards.sortedByDescending {
