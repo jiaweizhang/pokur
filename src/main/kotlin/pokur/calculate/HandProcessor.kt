@@ -16,7 +16,7 @@ class HandProcessor {
 
         val temporaryRanking = mutableListOf<RankingUnit>()
         holeCards.forEach {
-            val rank = findInt7(getSevenCards(communityCards, it))
+            val rank = findHandValue7Complex(getSevenCards(communityCards, it))
             temporaryRanking.add(RankingUnit(it, rank))
         }
 
@@ -26,14 +26,53 @@ class HandProcessor {
         return handRanking
     }
 
-    fun findInt5(fiveCards: List<Card>): Int {
+    fun findHandValue7Using5(sevenCards: List<Card>): Int {
+        val fiveCardsList = listOf(sevenCards.subList(0, 5),
+                listOf(sevenCards[0], sevenCards[1], sevenCards[2], sevenCards[3], sevenCards[5]),
+                listOf(sevenCards[0], sevenCards[1], sevenCards[2], sevenCards[3], sevenCards[6]),
+                listOf(sevenCards[0], sevenCards[1], sevenCards[2], sevenCards[4], sevenCards[5]),
+                listOf(sevenCards[0], sevenCards[1], sevenCards[2], sevenCards[4], sevenCards[6]),
+
+                listOf(sevenCards[0], sevenCards[1], sevenCards[2], sevenCards[5], sevenCards[6]),
+                listOf(sevenCards[0], sevenCards[1], sevenCards[3], sevenCards[4], sevenCards[5]),
+                listOf(sevenCards[0], sevenCards[1], sevenCards[3], sevenCards[4], sevenCards[6]),
+                listOf(sevenCards[0], sevenCards[1], sevenCards[3], sevenCards[5], sevenCards[6]),
+                listOf(sevenCards[0], sevenCards[1], sevenCards[4], sevenCards[5], sevenCards[6]),
+
+                listOf(sevenCards[0], sevenCards[2], sevenCards[3], sevenCards[4], sevenCards[5]),
+                listOf(sevenCards[0], sevenCards[2], sevenCards[3], sevenCards[4], sevenCards[6]),
+                listOf(sevenCards[0], sevenCards[2], sevenCards[3], sevenCards[5], sevenCards[6]),
+                listOf(sevenCards[0], sevenCards[2], sevenCards[4], sevenCards[5], sevenCards[6]),
+                listOf(sevenCards[0], sevenCards[3], sevenCards[4], sevenCards[5], sevenCards[6]),
+
+                listOf(sevenCards[1], sevenCards[2], sevenCards[3], sevenCards[4], sevenCards[5]),
+                listOf(sevenCards[1], sevenCards[2], sevenCards[3], sevenCards[4], sevenCards[6]),
+                listOf(sevenCards[1], sevenCards[2], sevenCards[3], sevenCards[5], sevenCards[6]),
+                listOf(sevenCards[1], sevenCards[2], sevenCards[4], sevenCards[5], sevenCards[6]),
+                listOf(sevenCards[1], sevenCards[3], sevenCards[4], sevenCards[5], sevenCards[6]),
+
+                listOf(sevenCards[2], sevenCards[3], sevenCards[4], sevenCards[5], sevenCards[6]))
+
+        var max = 0
+        for (lst in fiveCardsList) {
+            val foundHandValue = findHandValue5(lst)
+            max = if (foundHandValue > max) foundHandValue else max
+        }
+        /*
+        return fiveCardsList.map {
+            findHandValue5(it)
+        }.max()!!.toInt()
+        */
+        return max
+    }
+
+    fun findHandValue5(fiveCards: List<Card>): Int {
         // find handValue using grouping
         var pair1 = -1
         var pair2 = -1
 
         var set = -1
 
-        var high1 = -1
         var high2 = -1
         var high3 = -1
         var high4 = -1
@@ -45,7 +84,7 @@ class HandProcessor {
         val five = fiveCards[4]
 
         // process first card
-        high1 = one.face
+        var high1 = one.face
 
         // process second card
         if (two.face == high1) {
@@ -151,7 +190,7 @@ class HandProcessor {
                 return (3 shl 20) + ((if (pair1 > high2) pair1 else high2) shl 16) + ((if (pair1 > high2) high2 else pair1) shl 12) + (high1 shl 8)
             } else if ((pair1 != -1)) {
                 // 2 1 1 1
-                return (2 shl 20) + (order3(high1, high2, five.face) shl 4)
+                return (2 shl 20) + (pair1 shl 16) + (order3(high1, high2, five.face) shl 4)
             } else if (five.face == high1) {
                 // 2 1 1 1
                 return (2 shl 20) + (high1 shl 16) + (order3(high2, high3, high4) shl 4)
@@ -266,10 +305,9 @@ class HandProcessor {
             0
         }
         return (a shl 20) + (b shl 16) + (c shl 12) + (d shl 8) + (e shl 4) + straight
-
     }
 
-    fun findInt7(sevenCards: List<Card>): Int {
+    fun findHandValue7Complex(sevenCards: List<Card>): Int {
         var type: Int
 
         val sortedCards = sevenCards.sortedByDescending {
@@ -677,7 +715,7 @@ class HandProcessor {
                 }
             }
             if ((distinctCards.get(3).face == 3)
-                    and (distinctCards.get(5).face == 0)
+                    and (distinctCards.get(6).face == 0)
                     and (distinctCards.get(0).face == 12)) {
                 // 5-high straight
                 type = 5

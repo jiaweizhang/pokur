@@ -23,9 +23,9 @@ class ProbabilityVerifyTests : StringSpec() {
             var pCount = 0
             var hCount = 0
 
-            for (i in 1..1000000) {
+            for (i in 1..100000) {
                 val fiveCards = cg.generateCardsBySet(5)
-                val handValue = hp.findInt5(fiveCards)
+                val handValue = hp.findHandValue5(fiveCards)
                 when (handValue shr 20) {
                     9 -> sfCount++
                     8 -> qCount++
@@ -64,7 +64,7 @@ class ProbabilityVerifyTests : StringSpec() {
 
             for (i in 1..100000) {
                 val sevenCards = cg.generateCardsBySet(7)
-                val handValue = hp.findInt7(sevenCards)
+                val handValue = hp.findHandValue7Complex(sevenCards)
                 when (handValue shr 20) {
                     9 -> sfCount++
                     8 -> qCount++
