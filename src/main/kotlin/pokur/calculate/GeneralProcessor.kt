@@ -18,7 +18,7 @@ class GeneralProcessor {
         var tieCount = 0
 
         for (i in 0..iterations) {
-            val generatedCards = cg.generateCardsBySet(7)
+            val generatedCards = cg.generateCardsBySet(holeCards, 7)
 
             val yourHandValue = hp.findHandValue7Complex(listOf(holeCards[0], holeCards[1],
                     generatedCards[0], generatedCards[1], generatedCards[2], generatedCards[3], generatedCards[4]))
