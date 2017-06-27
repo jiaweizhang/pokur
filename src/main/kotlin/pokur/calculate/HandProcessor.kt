@@ -53,17 +53,22 @@ class HandProcessor {
 
                 listOf(sevenCards[2], sevenCards[3], sevenCards[4], sevenCards[5], sevenCards[6]))
 
-        var max = 0
-        for (lst in fiveCardsList) {
-            val foundHandValue = findHandValue5(lst)
-            max = if (foundHandValue > max) foundHandValue else max
-        }
-        /*
         return fiveCardsList.map {
             findHandValue5(it)
         }.max()!!.toInt()
-        */
-        return max
+    }
+
+    fun findHandValue6Using5(sixCards: List<Card>): Int {
+        val fiveCardsList = listOf(sixCards.subList(0, 5),
+                listOf(sixCards[0], sixCards[2], sixCards[3], sixCards[4], sixCards[5]),
+                listOf(sixCards[0], sixCards[1], sixCards[3], sixCards[4], sixCards[5]),
+                listOf(sixCards[0], sixCards[1], sixCards[2], sixCards[4], sixCards[5]),
+                listOf(sixCards[0], sixCards[1], sixCards[2], sixCards[3], sixCards[5]),
+                listOf(sixCards[1], sixCards[2], sixCards[3], sixCards[4], sixCards[5]))
+
+        return fiveCardsList.map {
+            findHandValue5(it)
+        }.max()!!.toInt()
     }
 
     fun findHandValue5(fiveCards: List<Card>): Int {
