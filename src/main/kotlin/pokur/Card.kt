@@ -5,6 +5,17 @@ package pokur
  */
 
 class Card(val face: Int, val suit: Char) {
+
+    fun toInt(): Int {
+        val base = when (suit) {
+            'S' -> 0
+            'H' -> 13
+            'C' -> 26
+            else -> 39
+        }
+        return base + face
+    }
+
     override fun toString(): String {
         val faceChar = when (face) {
             0 -> '2'

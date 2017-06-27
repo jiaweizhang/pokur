@@ -7,7 +7,7 @@ import pokur.Card
  */
 
 class HandProcessor {
-    fun getSevenCards(communityCards: List<Card>, holeCards: PlayerHand): List<Card> {
+    private fun getSevenCards(communityCards: List<Card>, holeCards: PlayerHand): List<Card> {
         return communityCards.plus(holeCards.holeCards.first).plus(holeCards.holeCards.second)
     }
 

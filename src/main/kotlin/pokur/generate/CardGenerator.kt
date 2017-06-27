@@ -30,17 +30,11 @@ class CardGenerator {
         }
     }
 
-    /**
-     * Set generation is better unless a lot (more than half of deck) is generated
-     */
-    fun generateCardsBySet(count: Int): List<Card> {
-        val alreadySeen = mutableSetOf<Int>()
+    private fun generateCardsHelper(alreadySeen: MutableSet<Int>, count: Int): List<Card> {
         val randomCards = mutableListOf<Card>()
         while (randomCards.size < count) {
             val randomInt = RANDOM.nextInt(52)
-            if (alreadySeen.contains(randomInt)) {
-                continue
-            } else {
+            if (!alreadySeen.contains(randomInt)) {
                 alreadySeen.add(randomInt)
                 randomCards.add(Card(randomInt % 13,
                         when (randomInt / 13) {
@@ -52,5 +46,16 @@ class CardGenerator {
             }
         }
         return randomCards
+    }
+
+    /**
+     * Set generation is better unless a lot (more than half of deck) is generated
+     */
+    fun generateCardsBySet(count: Int): List<Card> {
+        return generateCardsHelper(mutableSetOf<Int>(), count)
+    }
+
+    fun generateCardsBySet(exclusions: List<Card>, count: Int): List<Card> {
+        return generateCardsHelper(mutableSetOf<Int>(exclusions[0].toInt(), exclusions[1].toInt()), count)
     }
 }
