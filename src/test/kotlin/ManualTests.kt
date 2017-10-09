@@ -235,7 +235,7 @@ class ManualTests : StringSpec() {
         }
 
         "S 5" {
-            SevenCards(Card(3, 'S'), Card(2, 'S'), Card(1, 'D'), Card(0, 'S'), Card(12, 'S'), Card(1, 'D'), Card(0, 'C'))
+            SevenCards(Card(3, 'S'), Card(2, 'S'), Card(1, 'D'), Card(0, 'S'), Card(12, 'S'), Card(1, 'C'), Card(0, 'C'))
                     .process(hp, 5, 3)
         }
 
